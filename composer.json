@@ -1,7 +1,7 @@
 {
 	"name": "lukereative/silverstripe-podcast",
 	"description": "A module for adding a podcast or multiple podcasts to your SilverStripe site. With support for audio, video or other files.",
-	"type": "silverstripe-module",
+	"type": "silverstripe-vendormodule",
 	"keywords": ["silverstripe", "podcast"],
 	"license": "MIT",
 	"authors": [{

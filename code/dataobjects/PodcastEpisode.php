@@ -1,69 +1,92 @@
 <?php
 
+namespace Lukereative\SilverStripePodcast\Model;
+
+use Lukereative\SilverStripePodcast\Pages\PodcastPage;
+use SilverStripe\Assets\File;
+use SilverStripe\Assets\Image;
+use SilverStripe\Control\Controller;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\Security\Permission;
+
+/**
+ * Class PodcastEpisode
+ * @package Lukereative\SilverStripePodcast\Model
+ */
 class PodcastEpisode extends DataObject
 {
-    private static $has_one = array(
-        'EpisodeFile' => 'File'
-        ,'EpisodeImage' => 'Image'
-        ,'PodcastPage' => 'PodcastPage'
-    );
+    /**
+     * @var array
+     */
+    private static $db = [
+        'EpisodeTitle' => 'Varchar(255)',
+        'EpisodeSubtitle' => 'Varchar(255)',
+        'EpisodeSummary' => 'HTMLText',
+        'EpisodeAuthor' => 'Varchar(255)',
+        'BlockEpisode' => 'Boolean',
+        'ExplicitEpisode' => 'Enum(array("No", "Clean", "Yes"))',
+        'EpisodeDate' => 'Datetime',
+        'EpisodeDuration' => 'Time',
+    ];
 
-    private static $db = array(
-        'EpisodeTitle' => 'VarChar(255)'
-        ,'EpisodeSubtitle' => 'VarChar(255)'
-        ,'EpisodeSummary' => 'HTMLText'
-        ,'EpisodeAuthor' => 'VarChar(127)'
-        ,'BlockEpisode' => 'Boolean'
-        ,'ExplicitEpisode' => 'enum("No, Clean, Yes");'
-        ,'EpisodeDate' => 'SS_Datetime'
-        ,'EpisodeDuration' => 'Time'
-    );
+    /**
+     * @var array
+     */
+    private static $has_one = [
+        'EpisodeFile' => File::class,
+        'EpisodeImage' => Image::class,
+        'PodcastPage' => PodcastPage::class,
+    ];
 
-    private static $searchable_fields = array(
-        'EpisodeTitle'
-        ,'EpisodeSubtitle'
-        ,'EpisodeAuthor'
-        ,'BlockEpisode'
-        ,'ExplicitEpisode'
-        ,'EpisodeDate'
-    );
+    /**
+     * @var array
+     */
+    private static $owns = [
+        'EpisodeFile',
+        'EpisodeImage',
+    ];
 
-    private static $summary_fields = array(
-        'EpisodeThumb' => 'Image'
-        ,'EpisodeDate' => 'Date'
-        ,'EpisodeTitle' => 'Title'
-        ,'EpisodeDuration' => 'Duration'
-    );
+    /**
+     * @var array
+     */
+    private static $table_name = 'PodcastEpisode';
 
-    private static $better_buttons_actions = array(
-        'getTags'
-    );
+    /**
+     * @var array
+     */
+    private static $searchable_fields = [
+        'EpisodeTitle',
+        'EpisodeSubtitle',
+        'EpisodeAuthor',
+        'BlockEpisode',
+        'ExplicitEpisode',
+        'EpisodeDate',
+    ];
 
+    /**
+     * @var array
+     */
+    private static $summary_fields = [
+        'EpisodeThumb' => 'Image',
+        'EpisodeDate' => 'Date',
+        'EpisodeTitle' => 'Title',
+        'EpisodeDuration' => 'Duration',
+    ];
+
+    /*private static $better_buttons_actions = [
+        'getTags',
+    ];*/
+
+    /**
+     * @return FieldList
+     */
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
 
-        $fields->fieldByName('Root.Main.EpisodeDate')->dateField
-            ->setConfig('showcalendar', true)
-            ->setConfig('dateformat', 'dd/MM/YYYY');
-        $fields->fieldByName('Root.Main.EpisodeDate')->timeField
-            ->setConfig('timeformat', 'HH:mm');
-        $fields->fieldByName('Root.Main.EpisodeDate')
-            ->setDescription('Date when the episode was published.')
-            ->setValue(date('r'));
-
-        $fields->fieldByName('Root.Main.EpisodeDuration')
-            ->setConfig('timeformat', 'HH:mm:ss')
-            ->setDescription('In the format HH:mm:ss e.g. 00:56:18');
-
-        $fields->fieldByName('Root.Main.BlockEpisode')
-            ->setDescription('Prevent the <strong>episode</strong> from appearing in the iTunes podcast directory.');
-        $fields->fieldByName('Root.Main.ExplicitEpisode')
-            ->setDescription("Displays an 'Explicit', 'Clean' or no parental advisory graphic next to your episode in iTunes.");
-
-        $fields->fieldByName('Root.Main.EpisodeFile')
-            ->setFolderName('podcast/episodes')
-            ->getValidator()->setAllowedExtensions(array(
+        /*$fields->fieldByName('EpisodeFile')
+            ->getValidator()->setAllowedExtensions([
                 'pdf',
                 'epub',
                 'mp3',
@@ -72,67 +95,63 @@ class PodcastEpisode extends DataObject
                 'm4v',
                 'mp4',
                 'mov',
-            ));
-
-        $fields->fieldByName('Root.Main.EpisodeImage')
-            ->setFolderName('podcast/episode-images')
-            ->getValidator()->setAllowedExtensions(array('jpg', 'png'));
+            ]);*/
 
         return $fields;
     }
 
-    public function getBetterButtonsUtils()
+    /*public function getBetterButtonsUtils()
     {
         $fields = parent::getBetterButtonsUtils();
         $fields->push(
             BetterButtonCustomAction::create('getTags', 'Get ID3 Tags')
-            ->setRedirectType(BetterButtonCustomAction::REFRESH)
+                ->setRedirectType(BetterButtonCustomAction::REFRESH)
         );
 
         return $fields;
-    }
+    }*/
 
 
     /**
-    * Returns the episode's title
-    * @return string
-    */
+     * Returns the episode's title
+     * @return string
+     */
     public function getTitle()
     {
         return $this->EpisodeTitle;
     }
 
     /**
-    * Returns the absolute link to the episode's page
-    * @return string
-    */
+     * Returns the absolute link to the episode's page
+     * @return string
+     */
     public function episodeLink()
     {
-        return $this->PodcastPage()->AbsoluteLink('episode/' . $this->ID);
+        return Controller::join_links($this->PodcastPage()->AbsoluteLink('episode'), $this->ID);
     }
 
     /**
-    * Returns the relative link to the episode's page
-    * @return string
-    */
+     * Returns the relative link to the episode's page
+     * @return string
+     */
     public function relativeEpisodeLink()
     {
-        return $this->PodcastPage()->RelativeLink('episode/' . $this->ID);
+        return Controller::join_links($this->PodcastPage()->RelativeLink('episode'), $this->ID);
     }
 
     /**
-    * Returns a thumbnail of the Episode Image
-    * @return Image
-    */
+     * Returns a thumbnail of the Episode Image
+     * @return Image
+     */
     public function episodeThumb()
     {
         return $this->EpisodeImage()->fill(40, 40);
     }
 
     /**
-    * Returns mime type for use in PodcastRSS enclosure
-    * @return string
-    */
+     * Returns mime type for use in PodcastRSS enclosure
+     * @return string
+     */
     public function getMime()
     {
         // return an empty string if there's no file
@@ -143,7 +162,7 @@ class PodcastEpisode extends DataObject
         $filename = $this->EpisodeFile()->getFilename();
         $filename = explode('.', $filename);
 
-        $mime_types = array(
+        $mime_types = [
             'pdf' => 'application/pdf',
             'epub' => 'document/x-epub',
             'mp3' => 'audio/mpeg',
@@ -152,7 +171,7 @@ class PodcastEpisode extends DataObject
             'm4v' => 'video/x-m4v',
             'mp4' => 'video/mp4',
             'mov' => 'video/quicktime',
-        );
+        ];
 
         $extension = strtolower(end($filename));
 
@@ -160,9 +179,9 @@ class PodcastEpisode extends DataObject
     }
 
     /**
-    * Returns the type for page template for audio, video tags or download link
-    * @return string
-    */
+     * Returns the type for page template for audio, video tags or download link
+     * @return string
+     */
     public function getType()
     {
         if (!$this->EpisodeFileID) {
@@ -173,6 +192,10 @@ class PodcastEpisode extends DataObject
         return $mime[0];
     }
 
+    /**
+     * @return string
+     * @throws \getid3_exception
+     */
     public function getTags()
     {
         if (!$this->EpisodeFileID) {
@@ -190,23 +213,42 @@ class PodcastEpisode extends DataObject
         }
     }
 
-    public function canView($member = null)
+    /**
+     * @param null $member
+     * @param array $context
+     * @return bool
+     */
+    public function canView($member = null, $context = [])
     {
         return true;
     }
 
-    public function canEdit($member = null)
+    /**
+     * @param null $member
+     * @param array $context
+     * @return mixed
+     */
+    public function canEdit($member = null, $context = [])
     {
-        return Permission::check('PODCAST_ADMIN');
+        return Permission::check('PODCAST_ADMIN', 'any', $member);
     }
 
-    public function canDelete($member = null)
+    /**
+     * @param null $member
+     * @param array $context
+     * @return mixed
+     */
+    public function canDelete($member = null, $context = [])
     {
-        return Permission::check('PODCAST_ADMIN');
+        return Permission::check('PODCAST_ADMIN', 'any', $member);
     }
 
-    public function canCreate($member = null)
+    /**
+     * @param null $member
+     * @return mixed
+     */
+    public function canCreate($member = null, $context = null)
     {
-        return Permission::check('PODCAST_ADMIN');
+        return Permission::check('PODCAST_ADMIN', 'any', $member);
     }
 }

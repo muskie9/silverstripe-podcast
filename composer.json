@@ -1,19 +1,50 @@
 {
-	"name": "lukereative/silverstripe-podcast",
-	"description": "A module for adding a podcast or multiple podcasts to your SilverStripe site. With support for audio, video or other files.",
-	"type": "silverstripe-vendormodule",
-	"keywords": ["silverstripe", "podcast"],
-	"license": "MIT",
-	"authors": [{
-		"name": "Luke Edwards",
-		"email": "luke@edwards.co.nz"
-	}],
-	"require": {
-		"silverstripe/recipe-cms": "^1.0@dev",
-        "silverstripe/vendor-plugin": "^1.0@dev",
-		"james-heinrich/getid3": "^v1.9"
-	},
-	"extra": {
-		"installer-name": "podcast"
-	}
+  "name": "lukereative/silverstripe-podcast",
+  "description": "A module for adding a podcast or multiple podcasts to your SilverStripe site. With support for audio, video or other files.",
+  "type": "silverstripe-vendormodule",
+  "keywords": [
+    "silverstripe",
+    "podcast"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Luke Edwards",
+      "email": "luke@edwards.co.nz"
+    }
+  ],
+  "require": {
+    "silverstripe/recipe-cms": "^1.0@dev",
+    "silverstripe/vendor-plugin": "^1.0@dev",
+    "james-heinrich/getid3": "^v1.9"
+  },
+  "require-dev": {
+    "phpunit/PHPUnit": "^5.7",
+    "squizlabs/php_codesniffer": "*"
+  },
+  "config": {
+    "process-timeout": 600
+  },
+  "extra": {
+    "expose": [
+      "thirdparty",
+      "images",
+      "javascript"
+    ],
+    "installer-name": "podcast",
+    "branch-alias": {
+      "dev-master": "2.0.x-dev"
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Lukereative\\SilverStripePodcast\\": "src/"
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "scripts": {
+    "lint": "vendor/bin/phpcs src/ tests/",
+    "lint-clean": "vendor/bin/phpcbf src/ tests/"
+  }
 }
